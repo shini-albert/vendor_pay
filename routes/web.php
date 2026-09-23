@@ -9,3 +9,4 @@ Route::get('/', function () {
 
 Route::get('/test',[TestpageController::class,'test']
 );
+ 
