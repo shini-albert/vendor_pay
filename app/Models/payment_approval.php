@@ -23,7 +23,7 @@ class PaymentApproval extends Model
 
     public function workflowStep()
     {
-        return $this->belongsTo(WorkflowStep::class, 'workflow_step_id');
+        return $this->belongsTo(Workflow_step::class, 'workflow_step_id');
     }
 
     public function user()
