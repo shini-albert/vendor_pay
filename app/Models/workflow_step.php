@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class WorkflowStep extends Model
+class Workflow_step extends Model
 {
     protected $fillable = [
         'workflow_id',
@@ -13,9 +13,9 @@ class WorkflowStep extends Model
         'step_name',
     ];
 
-    public function workflow()
+    public function workflowrule()
     {
-        return $this->belongsTo(Workflow::class);
+        return $this->belongsTo(workflow_rule::class);
     }
 
     public function role()
