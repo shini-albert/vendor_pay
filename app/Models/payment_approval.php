@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PaymentApproval extends Model
@@ -36,3 +36,4 @@ class PaymentApproval extends Model
         return $this->belongsTo(Role::class);
     }
 }
+

@@ -5,8 +5,9 @@ namespace App\Models;
 // 1. Change model inheritance to Authenticatable
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable
+class user extends Model
 {
     use Notifiable;
 
@@ -27,3 +28,5 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 }
+    //
+
