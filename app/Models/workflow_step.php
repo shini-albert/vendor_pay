@@ -17,8 +17,7 @@ class Workflow_step extends Model
     {
         return $this->belongsTo(workflow_rule::class);
     }
-
-    public function role()
+      public function role()
     {
         return $this->belongsTo(Role::class);
     }
