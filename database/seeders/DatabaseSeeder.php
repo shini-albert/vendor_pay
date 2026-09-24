@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
        $this->call(VendorSeeder::class);
        $this->call(workflowSeeder::class);
        $this->call(Workflow_rulesSeeder::class);
+       $this->call(workflow_stepSeeder::class);
      
     }
 }
