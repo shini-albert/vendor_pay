@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Workflow_step extends Model
+class Workflow_Step extends Model
 {
+    protected $table = 'workflow_steps';
     protected $fillable = [
         'workflow_id',
         'step_no',
