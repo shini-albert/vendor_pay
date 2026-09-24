@@ -79,18 +79,34 @@
     button:hover {
       background-color: #1e293b;
     }
+
+    .error-msg {
+      color: #dc2626;
+      font-size: 0.8rem;
+      margin-top: -0.75rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
   </style>
 </head>
 <body>
 
-  <form action="#" method="POST">
+  <form action="{{ url('/login') }}" method="POST">
+    @csrf
+
     <h2>Login</h2>
-    
+
     <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
+    <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus>
+    @error('email')
+      <span class="error-msg">{{ $message }}</span>
+    @enderror
 
     <label for="password">Password:</label>
     <input type="password" id="password" name="password" required>
+    @error('password')
+      <span class="error-msg">{{ $message }}</span>
+    @enderror
 
     <button type="submit">Login</button>
   </form>
