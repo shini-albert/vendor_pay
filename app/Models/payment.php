@@ -31,7 +31,12 @@ class payment extends Model
     {
         return $this->belongsTo(Workflow::class, 'workflow_id');
     }
-
+    
+    public function approvals()
+    {
+        return $this->hasMany(PaymentApproval::class, 'payment_id');
+    }
+    
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
