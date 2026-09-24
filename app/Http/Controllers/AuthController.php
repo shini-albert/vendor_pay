@@ -21,10 +21,13 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
-            return redirect()->route('test');
+            $request->session()->regenerate();
+            return redirect()->intended(route('payment'));
         }
 
-        return back()->withErrors(['email' => 'Invalid credentials']);
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ]);
     }
 
   
