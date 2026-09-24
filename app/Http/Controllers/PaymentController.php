@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Models\Vendor;
 use App\Models\Workflow_rule;
 use Illuminate\Support\Facades\Auth;
+
 class PaymentController extends Controller
 {
     public function create()

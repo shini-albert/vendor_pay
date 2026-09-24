@@ -1,27 +1,64 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Payment;
 use App\Models\PaymentApproval;
+use App\Models\Workflow_Step;
 use App\Models\workflow_rule;
-use App\Models\Workflow_step;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PaymentApprovalController extends Controller
 {
+    
+    public function index()
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $roleId = $user->role_id;
+
+  
+        $payments = Payment::with(['vendor', 'workflow', 'creator', 'approvals.user.role'])
+            ->where('status', 'pending')
+            ->get()
+            ->filter(function ($payment) use ($roleId) {
+                
+                $rule = workflow_rule::where('workflow_id', $payment->workflow_id)->first();
+                
+                if (!$rule) {
+                    return false;
+                }
+
+               
+                $step = Workflow_Step::where('workflow_rule_id', $rule->id)
+                    ->where('step_no', $payment->current_step_no)
+                    ->first();
+
+               
+                return $step && $step->role_id == $roleId;
+            });
+
+        return view('approvals', compact('payments'));
+    }
+
+
+   
     public function approve(Request $request, $id)
     {
         $payment = Payment::findOrFail($id);
-
-       
-        $rule = $this->findRule($payment);
+        
+        $rule = workflow_rule::where('workflow_id', $payment->workflow_id)->first();
 
         if (!$rule) {
             return back()->with('error', 'No matching rule found.');
         }
 
-        $step = Workflow_step::where('workflow_id', $rule->workflow_id)
+        $step = Workflow_Step::where('workflow_rule_id', $rule->id)
             ->where('step_no', $payment->current_step_no)
             ->first();
 
@@ -29,138 +66,59 @@ class PaymentApprovalController extends Controller
             return back()->with('error', 'Workflow step not found.');
         }
 
-
-       
-        $user = Auth::user();
-
-        if($step->role_id != $user->role_id) {
-            return back()->with('error', 'User are not authorized to approve this payment.');
-        }
-
-
-        
+   
         PaymentApproval::create([
-            'payment_id' => $payment->id,
-            'workflow_step_id' => $step->id,
-            'user_id' => $user->id,
-            'action' => 'approved',
-            'acted_at' => now(),
+            'payment_id'      => $payment->id,
+            'workflow_step_id'=> $step->id,
+            'user_id'         => Auth::id(),
+            'role_id'         => Auth::user()->role_id,
+            'action'          => 'approved',
+            'remarks'         => $request->remarks ?? 'Approved',
+            'acted_at'        => now(),
         ]);
 
-        $nextStep = Workflow_step::where('workflow_id', $rule->workflow_id)
-            ->where('step_no', $step->step_no + 1)
+ 
+        $nextStep = Workflow_Step::where('workflow_rule_id', $rule->id)
+            ->where('step_no', $payment->current_step_no + 1)
             ->first();
-
 
         if ($nextStep) {
-
-            // Move payment to next approval step
-            $payment->current_step_no = $nextStep->step_no;
-            $payment->save();
-
-            return back()->with(
-                'success','Payment approved and moved to next approval level.'
-            );
+            
+            $payment->update([
+                'current_step_no' => $payment->current_step_no + 1
+            ]);
+        } else {
+            
+            $payment->update([
+                'status' => 'approved'
+            ]);
         }
 
-
-        $payment->status = 'approved';
-        $payment->current_step_no = $step->step_no;
-        $payment->save();
-
-        return back()->with(
-            'success',
-            'Payment fully approved.'
-        );
-    }    
-
-    public function reject(Request $request, $id)
-    {
-        $request->validate([
-            'remarks' => 'required|string|max:250',
-        ]);
-
-        $payment = Payment::findOrFail($id);
-
-        $rule = $this->findRule($payment);
-
-        if (!$rule) {
-            return back()->with('error', 'No matching rule found.');
-        }
-
-        $step = workflow_step::where('workflow_rule_id', $rule->id)
-            ->where('step_no', $payment->current_step_no ?? 1)
-            ->first();
-
-        if (!$step) {
-            return back()->with('error', 'Workflow step not found.');
-        }
-
-        $user = Auth::user();
-
-        if (!$user || $step->role_id != $user->role_id) {
-            return back()->with('error', 'You are not authorized to reject this payment.');
-        }
-
-        PaymentApproval::create([
-            'payment_id'       => $payment->id,
-            'workflow_step_id' => $step->id,
-            'user_id'          => $user->id,
-            'action'           => 'rejected',
-            'description'      => $request->input('description'),
-            'acted_at'         => now(),
-        ]);
-
-       
-        $payment->status = 'rejected';
-        $payment->save();
-
-        return back()->with('success', 'Payment has been rejected successfully.');
+        return back()->with('success', 'Payment approved successfully!');
     }
 
-    private function findRule(Payment $payment)
+   
+    public function reject(Request $request, $id)
     {
-        $rules = workflow_rule::where(
-            'workflow_id',
-            $payment->workflow_id
-        )->get();
+        $payment = Payment::findOrFail($id);
 
-        foreach ($rules as $rule) {
+        $rule = workflow_rule::where('workflow_id', $payment->workflow_id)->first();
+        $step = $rule ? Workflow_Step::where('workflow_rule_id', $rule->id)->where('step_no', $payment->current_step_no)->first() : null;
 
-            $fieldValue = $payment->{$rule->field};
+        PaymentApproval::create([
+            'payment_id'      => $payment->id,
+            'workflow_step_id'=> $step ? $step->id : null,
+            'user_id'         => Auth::id(),
+            'role_id'         => Auth::user()->role_id,
+            'action'          => 'rejected',
+            'remarks'         => $request->remarks ?? 'Rejected',
+            'acted_at'        => now(),
+        ]);
 
-            $blnmatch = false;
+        $payment->update([
+            'status' => 'rejected'
+        ]);
 
-            switch ($rule->operator) {
-
-                case '=':
-                    $blnmatch = ($fieldValue == $rule->value);
-                    break;
-
-                case '>':
-                    $blnmatch = ($fieldValue > $rule->value);
-                    break;
-
-                case '>=':
-                    $blnmatch = ($fieldValue >= $rule->value);
-                    break;
-
-                case '<':
-                    $blnmatch = ($fieldValue < $rule->value);
-                    break;
-
-                case '<=':
-                    $blnmatch = ($fieldValue <= $rule->value);
-                    break;
-
-                case '!=':
-                    $blnmatch = ($fieldValue != $rule->value);
-                    break;
-            }
-
-            if ($blnmatch) {
-                return $rule;
-            }
-        }
+        return back()->with('success', 'Payment has been rejected.');
     }
 }
