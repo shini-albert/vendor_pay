@@ -16,15 +16,16 @@ class Workflow_Step extends Model
 
     public function workflowrule()
     {
-        return $this->belongsTo(workflow_rule::class);
+  
+        return $this->belongsTo(workflow_rule::class, 'workflow_id');
     }
-      public function role()
+
+    /**
+     * Get the role associated with the workflow step.
+     */
+    public function role()
     {
-        return $this->belongsTo(Role::class);
-    }
-    public function workflowsteps()
-    {
-        return $this->hasMany(Workflow_Step::class);
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
 }

@@ -2,25 +2,40 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PaymentApproval extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'payment_id',
+        'workflow_step_id',
         'user_id',
-        'step_no',
-        'status',
-        'comments',
+        'role_id',
+        'action',
+        'remarks',
+        'acted_at',
     ];
+
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class);
+    }
+
+    public function workflowStep()
+    {
+        return $this->belongsTo(Workflow_Step::class, 'workflow_step_id');
+    }
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function payment()
+    public function role()
     {
-        return $this->belongsTo(Payment::class);
+        return $this->belongsTo(Role::class);
     }
 }

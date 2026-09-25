@@ -7,26 +7,26 @@
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 25px; color: #333; }
         .container { max-width: 1200px; margin: 0 auto; }
-        .header-bar { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .header-bar h2 { margin: 0; font-size: 20px; color: #2c3e50; }
-        
-        .table-container { background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
-        th { background-color: #f8f9fa; color: #405057; padding: 12px 15px; border-bottom: 2px solid #dee2e6; font-weight: 600; white-space: nowrap; }
-        td { padding: 12px 15px; border-bottom: 1px solid #dee2e6; vertical-align: top; }
+
+        .table-container { background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        th { background-color: #f8f9fa; color: #495057; font-weight: 600; padding: 12px 15px; border-bottom: 2px solid #dee2e6; }
+        td { padding: 12px 15px; border-bottom: 1px solid #e9ecef; vertical-align: top; }
         tr:hover { background-color: #f1f3f5; }
 
         .badge-status { background-color: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; display: inline-block; }
         .badge-step { background-color: #e3f2fd; color: #0d47a1; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
-        
-        textarea { width: 100%; padding: 6px 8px; border: 1px solid #ced4da; border-radius: 4px; font-family: inherit; font-size: 13px; box-sizing: border-box; resize: vertical; }
-        
+
+        textarea { width: 100%; padding: 6px 8px; border: 1px solid #ced4da; border-radius: 4px; font-family: inherit; font-size: 13px; box-sizing: border-box; }
+
         .btn-group { display: flex; gap: 6px; margin-top: 6px; }
         .btn { padding: 6px 12px; font-weight: bold; cursor: pointer; color: #fff; font-size: 12px; border: none; border-radius: 4px; }
         .btn-approve { background-color: #28a745; }
         .btn-reject { background-color: #dc3545; }
         .btn-toggle { background-color: #6c757d; font-size: 11px; padding: 3px 8px; margin-top: 5px; border-radius: 3px; }
-        
+
         .history-box { background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px dashed #ccc; font-size: 12px; margin-top: 5px; display: none; }
         .empty-box { text-align: center; padding: 40px; background: #fff; border-radius: 8px; color: #777; }
         .alert-success { background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
@@ -40,15 +40,23 @@
         <h2>Payment Approvals List (Role: {{ Auth::user()->role->name ?? 'User' }})</h2>
         <div>
             <a href="{{ route('payment') }}" style="color: #007bff; text-decoration: none; font-weight: bold; margin-left: 10px;">+ New Payment</a>
+            <form method="POST" action="{{ route('logout') }}" style="display: inline; margin-left: 15px;">
+                @csrf
+                <button type="submit" style="background: none; border: none; color: #dc3545; font-weight: bold; cursor: pointer; padding: 0; font-size: inherit;">
+                    Logout
+                </button>
+            </form>
         </div>
     </div>
 
     @if(session('success'))
         <div class="alert-success">{{ session('success') }}</div>
     @endif
+
     @if(session('error'))
         <div class="alert-danger">{{ session('error') }}</div>
     @endif
+
     @if($errors->any())
         <div class="alert-danger">{{ $errors->first() }}</div>
     @endif
@@ -98,8 +106,8 @@
                                 <strong>Audit Logs:</strong>
                                 @forelse($payment->approvals ?? [] as $history)
                                     <p style="margin: 3px 0; font-size: 11px;">
-                                        <strong>{{ $history->user->name ?? 'User' }}:</strong> 
-                                        {{ ucfirst($history->action) }} 
+                                        <strong>{{ $history->user->name ?? 'User' }}:</strong>
+                                        {{ ucfirst($history->action) }}
                                         @if($history->remarks) ("{{ $history->remarks }}") @endif
                                         <span style="color: #6c757d; font-size: 10px;">({{ $history->acted_at }})</span>
                                     </p>
@@ -114,7 +122,7 @@
                                 <textarea id="remarks-{{ $payment->id }}" name="remarks" rows="2" placeholder="Enter remarks (required if rejecting)..."></textarea>
                                 <div class="btn-group">
                                     <button type="submit" formaction="{{ route('payments.approve', $payment->id) }}" class="btn btn-approve">Approve</button>
-                                    <button type="submit" formaction="{{ route('payments.reject', $payment->id) }}" class="btn btn-reject" onclick="return confirm('Are you sure you want to reject this payment?');">Reject</button>
+                                    <button type="submit" formaction="{{ route('payments.reject', $payment->id) }}" class="btn btn-reject" onclick="return confirm('Are you sure you want to reject this payment?')">Reject</button>
                                 </div>
                             </form>
                         </td>
