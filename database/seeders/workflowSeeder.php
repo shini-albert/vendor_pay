@@ -12,13 +12,17 @@ class workflowSeeder extends Seeder
      */
     public function run(): void
     {
-        workflow::create([
-            'name' => 'Payment Approval',
-            'code' => 'PAY_APPROVAL',
+        $Normal=workflow::create([
+            'name' => 'Normal payment',
+            'code' => 'NORMAL_PAY',
          ]);
-         workflow::create([
-            'name' => 'Receipt Approval',
-            'code' => 'REC_APPROVAL',
+         $High=workflow::create([
+            'name' => 'High Value Payment',
+            'code' => 'HIGH_PAY',
+         ]);
+         $VHigh=workflow::create([
+            'name' => 'Very High Value Payment',
+            'code' => 'VERY_HIGH_PAY',
          ]);
     }
 }
