@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class workflow extends Model
 {
+    protected 
     public function rules()  {
        return $this->hasMany(workflow_rule::class);
     }
