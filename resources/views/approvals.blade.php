@@ -37,7 +37,7 @@
 
 <div class="container">
     <div class="header-bar">
-        <h2>Payment Approvals List (Role: {{ Auth::user()->role->name ?? 'User' }})</h2>
+        <h2>Payment Approvals List</h2>
         <div>
             <a href="{{ route('payment') }}" style="color: #007bff; text-decoration: none; font-weight: bold; margin-left: 10px;">+ New Payment</a>
             <form method="POST" action="{{ route('logout') }}" style="display: inline; margin-left: 15px;">
@@ -134,7 +134,6 @@
     @else
         <div class="empty-box">
             <h3>No Payments Found</h3>
-            <p>Go to the <a href="{{ route('payment') }}">Payment Page</a> and create a payment to see it appear here.</p>
         </div>
     @endif
 </div>
