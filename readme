@@ -7,7 +7,7 @@ Admin   : admin@gmaill.com
 Password : 123456 >>for all user
 
 Installation steps
-1. setup laravel using composer and create project (no extra packages used)
+setup laravel using composer and create project (no extra packages used)
 
 
  
