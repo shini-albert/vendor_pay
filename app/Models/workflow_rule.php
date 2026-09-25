@@ -15,7 +15,13 @@ class workflow_rule extends Model
     ];
     public function workflow()
     {
-        return $this->belongsTo(workflow::class);
+        return $this->belongsTo(Workflow::class, 'workflow_id');
+    }
+
+    
+    public function steps()
+    {
+        return $this->hasMany(Workflow_Step::class, 'workflow_id', 'id');
     }
    
 }

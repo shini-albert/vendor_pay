@@ -47,7 +47,19 @@
 <body>
 
 <div class="container">
-    <h2>Create Vendor Payment</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 style="margin: 0;">Create Vendor Payment</h2>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <a href="{{ route('approvals.index') }}" style="color: #007bff; text-decoration: none; font-weight: bold;">View Approvals</a>
+            
+            <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
+                @csrf
+                <button type="submit" style="background: none; border: none; color: #dc3545; font-weight: bold; cursor: pointer; padding: 0; font-size: inherit;">
+                    Logout
+                </button>
+            </form>
+        </div>
+    </div>
 
     @if(session('success'))
         <div class="alert-success">{{ session('success') }}</div>
@@ -68,7 +80,7 @@
 
         <div class="form-group">
             <label>Payment No.</label>
-            <input type="text" name="payment_no" value="{{ strtoupper(substr(uniqid(), -4)) }}">
+            <input type="text" name="payment_no" value="{{ $nextPaymentNo }}" readonly>
         </div>
 
        

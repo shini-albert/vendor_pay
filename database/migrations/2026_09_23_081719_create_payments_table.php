@@ -14,7 +14,7 @@ return new class extends Migration
         //id, payment_no, vendor_id, amount, payment_date, description, workflow_id, status, current_step_no, created_by, created_at
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->string('payment_no', 50);
+            $table->string('payment_no');
             $table->foreignId('vendor_id');
             $table->integer('amount');
             $table->date('payment_date');

@@ -13,14 +13,13 @@ return new class extends Migration
     {
         //id, workflow_id, step_no, role_id, step_name
         Schema::create('workflow_steps', function (Blueprint $table) {
-            $table->id();
-         
-            $table->foreignId('workflow_id');               
-            $table->integer('step_no');
-            $table->foreignId('role_id');
-            $table->string('step_name', 50);    
-            $table->timestamps();
-        });
+        $table->id();
+        $table->foreignId('workflow_rule_id')->constrained('workflow_rules')->onDelete('cascade');
+        $table->integer('step_no');
+        $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
+        $table->string('step_name', 50);    
+        $table->timestamps();
+    });
     }
 
     /**
