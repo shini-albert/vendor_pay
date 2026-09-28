@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('workflows', function (Blueprint $table) {
             $table->id();
-            $table->string('name',50);    
-            $table->char('is_active', 1)->default('1');
+            $table->string('name',50); 
+            $table->string('code', 50)->unique();  
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

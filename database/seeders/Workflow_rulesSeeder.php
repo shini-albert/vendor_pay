@@ -9,7 +9,7 @@ class Workflow_rulesSeeder extends Seeder
 {
     public function run(): void
     {
-     
+  
         workflow_rule::create([
             'id'          => 1,
             'workflow_id' => 1,
@@ -18,19 +18,19 @@ class Workflow_rulesSeeder extends Seeder
             'value'       => '50000',
         ]);
 
-     
+
         workflow_rule::create([
             'id'          => 2,
-            'workflow_id' => 1,
+            'workflow_id' => 2,
             'field'       => 'amount',
-            'operator'    => '>', 
-            'value'       => '50000',
+            'operator'    => '<=',
+            'value'       => '200000',
         ]);
 
-   
+
         workflow_rule::create([
             'id'          => 3,
-            'workflow_id' => 1,
+            'workflow_id' => 3,
             'field'       => 'amount',
             'operator'    => '>',
             'value'       => '200000',

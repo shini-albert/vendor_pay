@@ -28,16 +28,16 @@ class PaymentController extends Controller
             'description'  => 'nullable|string'
         ]);
 
-        //$workflowId = 1;
 
-        
+        $workflowId = $this->checkWorkflowId($request->amount);
+
         Payment::create([
             'payment_no'      => $request->payment_no,
             'vendor_id'       => $request->vendor_id,
             'amount'          => $request->amount,
             'payment_date'    => $request->payment_date,
             'description'     => $request->description,
-            'workflow_id'     => 1,
+            'workflow_id'     => $workflowId,
             'status'          => 'pending',
             'current_step_no' => 1, 
             'created_by'      => Auth::user()->id
@@ -45,20 +45,30 @@ class PaymentController extends Controller
 
         return redirect()->route('payment')->with('success', 'Payment submitted successfully!');
     }
+
+    private function checkWorkflowId($amount)
+    {
     
-    //public function checkWorkflow($amount)
-    /*{
-        $rules = workflow_rule::orderBy('value')->get();
-        
+        $rules = workflow_rule::orderBy('value', 'asc')->get();
+
         foreach ($rules as $rule) {
-            if ($rule->operator === '>' && $amount > $rule->value) {
-                return $rule->id;
+            if ($rule->operator === '<=' && $amount <=  $rule->value) {
+                return $rule->workflow_id;
             }
-            if ($rule->operator === '<=' && $amount <= $rule->value) {
-                return $rule->id;
+            if ($rule->operator === '<' && $amount <  $rule->value) {
+                return $rule->workflow_id;
             }
         }
-        
-        return 1; /
-    }*/
+
+        foreach ($rules as $rule) {
+            if ($rule->operator === '>' && $amount > $rule->value) {
+                return $rule->workflow_id;
+            }
+            if ($rule->operator === '>=' && $amount >=  $rule->value) {
+                return $rule->workflow_id;
+            }
+        }
+
+        return 1;
+    }
 }

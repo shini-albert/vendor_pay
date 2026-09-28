@@ -1,8 +1,8 @@
 <?php
 
 namespace Database\Seeders;
+
 use App\Models\Vendor;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class VendorSeeder extends Seeder
@@ -12,27 +12,10 @@ class VendorSeeder extends Seeder
      */
     public function run(): void
     {
-        
-        Vendor::create([
-            'name' => 'ABC Suppliers',
-            'vendor_type' => 'General',
-         ]);
-         Vendor::create([
-            'name' => 'XYZ Services	Service',
-            'vendor_type' => 'Service',
-         ]);
-         Vendor::create([
-            'name' => 'Kerala Stationery Mart',
-            'vendor_type' => 'Supplies',
-         ]);
-         Vendor::create([
-            'name' => 'National Computers',
-            'vendor_type' => 'IT',
-         ]);
-        Vendor::create([
-            'name' => 'Metro Office Solutions',
-            'vendor_type' => 'General',
-         ]);
-
+        Vendor::create(['id' => 1, 'name' => 'ABC Suppliers',           'vendor_type' => 'General']);
+        Vendor::create(['id' => 2, 'name' => 'XYZ Services',            'vendor_type' => 'Service']);
+        Vendor::create(['id' => 3, 'name' => 'Kerala Stationery Mart', 'vendor_type' => 'Supplies']);
+        Vendor::create(['id' => 4, 'name' => 'National Computers',      'vendor_type' => 'IT']);
+        Vendor::create(['id' => 5, 'name' => 'Metro Office Solutions',  'vendor_type' => 'General']);
     }
 }

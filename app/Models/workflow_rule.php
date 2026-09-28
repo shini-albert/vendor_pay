@@ -10,18 +10,13 @@ class workflow_rule extends Model
     protected $table = 'workflow_rules';
     protected $fillable = [
         'workflow_id',
+        'field',
         'operator',
         'value',
     ];
+
     public function workflow()
     {
         return $this->belongsTo(Workflow::class, 'workflow_id');
     }
-
-    
-    public function steps()
-    {
-        return $this->hasMany(Workflow_Step::class, 'workflow_id', 'id');
-    }
-   
 }
