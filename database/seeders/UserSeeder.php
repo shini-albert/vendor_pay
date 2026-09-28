@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -13,48 +12,17 @@ class UserSeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void
-    {        
-        User::create([
-            'name' => 'Rehna',
-            'email' => 'rehna@gmail.com',
-            'password' => Hash::make('123456'),
-            'role_id' => 4,
-        ]);
+    {
+        $password = Hash::make('123456');
 
-        User::create([
-            'name' => 'Seniya',
-            'email' => 'seniya@gmail.com',
-            'password' => Hash::make('123456'),
-            'role_id' => 4,
-        ]);
+        User::create(['name' => 'Requester One', 'username' => 'requester1',  'email' => 'requester1@gmail.com', 'password' => $password, 'role_id' => 4]);
+        User::create(['name' => 'Seniya',         'email' => 'seniya@gmail.com',     'password' => $password, 'role_id' => 4]);
 
-        User::create([
-            'name' => 'Seniya Najeem',
-            'email' => 'seniyanajeem@gmail.com',
-            'password' => Hash::make('123456'),
-            'role_id' => 3,
-        ]);
+        User::create(['name' => 'Supervisor One','username' => 'supervisor1', 'email' => 'supervisor1@gmail.com','password' => $password, 'role_id' => 3]);
+        User::create(['name' => 'Rehna MN',       'email' => 'rehnamn@gmail.com',    'password' => $password, 'role_id' => 3]);
 
-        User::create([
-            'name' => 'Rehna MN',
-            'email' => 'rehnamn@gmail.com',
-            'password' => Hash::make('123456'),
-            'role_id' => 3,
-        ]);
+        User::create(['name' => 'Manager One', 'username' => 'manager1',   'email' => 'manager1@gmail.com',   'password' => $password, 'role_id' => 2]);
 
-        User::create([
-            'name' => 'Shini',
-            'email' => 'shini@gmail.com',
-            'password' => Hash::make('123456'),
-            'role_id' => 2,
-        ]);
-
-        User::create([
-            'name' => 'admin',
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('123456'),
-            'role_id' => 1,
-        ]);
+        User::create(['name' => 'Administrator', 'username' => 'admin', 'email' => 'admin@gmail.com',      'password' => $password, 'role_id' => 1]);
     }
 }
-   

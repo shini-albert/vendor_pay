@@ -20,4 +20,14 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'created_by');
+    }
 }

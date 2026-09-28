@@ -92,24 +92,24 @@
 <body>
 
   <form action="{{ url('/login') }}" method="POST">
-    @csrf
+  @csrf
 
-    <h2>Login</h2>
+  <h2>Login</h2>
 
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus>
-    @error('email')
-      <span class="error-msg">{{ $message }}</span>
-    @enderror
+  <label for="username">Username:</label>
+  <input type="text" id="username" name="username" value="{{ old('username') }}" required autofocus>
+  @error('username')
+    <span class="error-msg">{{ $message }}</span>
+  @enderror
 
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required>
-    @error('password')
-      <span class="error-msg">{{ $message }}</span>
-    @enderror
+  <label for="password">Password:</label>
+  <input type="password" id="password" name="password" required>
+  @error('password')
+    <span class="error-msg">{{ $message }}</span>
+  @enderror
 
-    <button type="submit">Login</button>
-  </form>
+  <button type="submit">Login</button>
+</form>
 
 </body>
 </html>

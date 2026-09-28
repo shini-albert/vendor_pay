@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('workflow_id')->constrained('workflows')->onDelete('cascade');
             $table->string('field', 50)->default('amount');
             $table->string('operator', 10);
-            $table->string('value', 50);
+            $table->decimal('value', 15, 2);
             $table->timestamps();
         });
     }
