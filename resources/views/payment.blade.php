@@ -97,10 +97,7 @@
      
         <div class="form-group">
             <label>Amount</label>
-            <input type="number" name="amount" min="0.01" step="0.01"  value="{{ old('amount') }}" required>
-           <!-- @error('amount')
-        <div class="text-danger">{{ $message }}</div>
-    @enderror-->
+            <input type="number" name="amount" step="0.01" value="{{ old('amount') }}" required>    
         </div>
 
    

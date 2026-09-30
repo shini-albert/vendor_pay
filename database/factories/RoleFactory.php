@@ -15,11 +15,12 @@ class RoleFactory extends Factory
      *
      * @return array<string, mixed>
      */
+    protected $model = \App\Models\Role::class;
     public function definition(): array
     {
         return [
-            'code' => $this->faker->unique()->word(),
-            'name' => $this->faker->word(),
+            'code' => fake()->unique()->word(),
+            'name' => fake()->word(),
         ];
     }
 }

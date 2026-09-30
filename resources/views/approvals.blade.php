@@ -75,7 +75,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>Sl no.</th>
                     <th>Payment No.</th>
                     <th>Date</th>
                     <th>Vendor</th>
@@ -109,7 +109,7 @@
                     <td>
                         <span class="badge-status">{{ strtoupper($payment->status ?? 'pending') }}</span>
                     </td>
-                    <<td>
+                    <td>
                         <button type="button" class="btn btn-toggle" onclick="toggleHistory({{ $payment->id }})">View History</button>
                         <div id="history-{{ $payment->id }}" class="history-box" style="display: none;">
                             <strong>Audit Logs:</strong>
@@ -137,7 +137,7 @@
         
                     <td>
                     @if(isset($payment->can_approve) ? $payment->can_approve : true)
-                        <textarea id="remarks-{{ $payment->id }}" name="remarks" rows="2" style="margin-bottom: 6px;"></textarea>
+                        <textarea id="remarks-{{ $payment->id }}" name="remarks" rows="2" placeholder="Enter remarks..." style="margin-bottom: 6px;"></textarea>
                         <div class="btn-group">
                         
                             <form action="{{ route('payments.approve', $payment->id) }}" method="POST" style="display:inline;">

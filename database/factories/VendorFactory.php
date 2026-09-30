@@ -15,12 +15,13 @@ class VendorFactory extends Factory
      *
      * @return array<string, mixed>
      */
+    protected $model = Vendor::class;
     public function definition(): array
     {
         return [
             'name' => fake()->company(),
-            'vendor_type' => 'Standard',
-            'is_active' => 1,
+            'vendor_type' => 'General',
+            'is_active' => '1',
         ];
     }
 }

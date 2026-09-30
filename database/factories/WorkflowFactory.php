@@ -15,11 +15,13 @@ class WorkflowFactory extends Factory
      *
      * @return array<string, mixed>
      */
+    protected $model = Workflow::class;
     public function definition(): array
     {
         return [
             'name' => fake()->word() . ' Workflow',
-            'description' => fake()->sentence(),
+            'code' => fake()->unique()->slug(),
+            'is_active' => true,
         ];
     }
 }

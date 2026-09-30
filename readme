@@ -1,18 +1,24 @@
+# Vendor Pay - Payment Approval Workflow Project
+
 >>Prerequisites
 
 PHP = 8.2
 Composer
+Node.js & npm
 MySQL database  
-
+Git
 
 
 >>Installation Steps
 
 1. Clone or setup the project repository.
-2. Set up a new Laravel project using Composer (no extra external packages are used): 
+2. Install PHP dependencies
+	composer install
+	npm install
+3. Set up a new Laravel project using Composer (no extra external packages are used): 
 	composer create-project laravel/laravel vendor_pay
 	cd vendor_pay
-3. Set configuration in .env
+4. Set configuration: cp .env.example .env
 
 
 
@@ -29,12 +35,12 @@ DB_PASSWORD=
 
 2. Create an empty database named payment_workflow in MySQL 
 
-
+3. Generate Application Key: php artisan key:generate
 
 >>Migration and Seeding Procedure
 
 1. Run the database migrations and seed the pre-defined roles, vendors, users, and rule configurations:  
-	php artisan migrate --seed
+	php artisan migrate:fresh --seed
 
 
 
