@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Vendor;
 use App\Models\workflow_rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class PaymentController extends Controller
 {
@@ -22,22 +23,25 @@ class PaymentController extends Controller
     {
         $request->validate([
             'payment_no'   => 'required|string|unique:payments,payment_no',
-            'vendor_id'    => 'required|exists:vendors,id',
-            'amount'       => 'required|integer|min:1',
+            'vendor_id'    => ['required','integer', Rule::exists('vendors', 'id')->where('is_active', '1'),],
+            'amount'       => 'required|numeric|min:1',
             'payment_date' => 'required|date',
-            'description'  => 'nullable|string'
-        ]);
+            'description'  => 'required|string',
+        ], [
+            'vendor_id.exists' => 'The selected vendor is currently inactive.',
+            'amount.min'       => 'The payment amount must be a positive number greater than zero.',
+            'description.required' => 'Description for the payment is mandatory.',]);
 
-        //$workflowId = 1;
 
-        
+        $workflowId = $this->checkWorkflowId($request->amount);
+
         Payment::create([
             'payment_no'      => $request->payment_no,
             'vendor_id'       => $request->vendor_id,
             'amount'          => $request->amount,
             'payment_date'    => $request->payment_date,
             'description'     => $request->description,
-            'workflow_id'     => 1,
+            'workflow_id'     => $workflowId,
             'status'          => 'pending',
             'current_step_no' => 1, 
             'created_by'      => Auth::user()->id
@@ -45,20 +49,25 @@ class PaymentController extends Controller
 
         return redirect()->route('payment')->with('success', 'Payment submitted successfully!');
     }
-    
-    //public function checkWorkflow($amount)
-    /*{
-        $rules = workflow_rule::orderBy('value')->get();
-        
+
+   private function checkWorkflowId($amount)
+    {
+        $rules = workflow_rule::orderBy('value', 'asc')->get();
+
         foreach ($rules as $rule) {
-            if ($rule->operator === '>' && $amount > $rule->value) {
-                return $rule->id;
-            }
-            if ($rule->operator === '<=' && $amount <= $rule->value) {
-                return $rule->id;
+            $matched = match ($rule->operator) {
+                '<'  => $amount < $rule->value,
+                '<=' => $amount <= $rule->value,
+                '='  => $amount == $rule->value,
+                '>'  => $amount > $rule->value,
+                '>=' => $amount >= $rule->value,
+                default => false,
+            };
+
+            if ($matched) {
+                return $rule->workflow_id;
             }
         }
-        
-        return 1; /
-    }*/
+        return 1;
+    }
 }

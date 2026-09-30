@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //id, name, vendor_type, is_active
+
         Schema::create('vendors', function (Blueprint $table) {
             $table->id();
-              $table->string('name',50);    
-               $table->string('vendor_type',10);
-               $table->char('is_active', 1)->default('1');
+            $table->string('name');    
+            $table->string('vendor_type');
+            $table->char('is_active')->default(true);
             $table->timestamps();
         });
     }

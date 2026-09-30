@@ -1,13 +1,67 @@
-User credentials
--------------------
-Requester: seniya@gmail.com 
-Supervisor: seniyanajeem@gmail.com  
-Manager:  shini@gmail.com
-Admin   : admin@gmaill.com
+>>Prerequisites
+
+PHP = 8.2
+Composer
+MySQL database  
+
+
+
+>>Installation Steps
+
+1. Clone or setup the project repository.
+2. Set up a new Laravel project using Composer (no extra external packages are used): 
+	composer create-project laravel/laravel vendor_pay
+	cd vendor_pay
+3. Set configuration in .env
+
+
+
+>>Database Setup
+
+1. Open .env file and configure database connection settings:
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=payment_workflow
+DB_USERNAME=root
+DB_PASSWORD=
+
+2. Create an empty database named payment_workflow in MySQL 
+
+
+
+>>Migration and Seeding Procedure
+
+1. Run the database migrations and seed the pre-defined roles, vendors, users, and rule configurations:  
+	php artisan migrate --seed
+
+
+
+>>Login Credentials
+
+Username of Requester: requester1 
+Username of Supervisor: supervisor1  
+Username of Manager:  manager1
+Username of Admin   : admin
 Password : 123456 >>for all user
 
-Installation steps
-setup laravel using composer and create project (no extra packages used)
+
+
+>>How to Run the Application
+
+1. Start the local development server using Artisan:
+	php artisan serve
+2. Open browser and navigate to [http://127.0.0.1:8000]. 
+
+
+
+>>How to Run Automated Tests
+
+php artisan test
+
 
 
  
+
+

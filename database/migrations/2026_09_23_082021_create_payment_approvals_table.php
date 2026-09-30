@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //id, payment_id, workflow_step_id, user_id, role_id, action, remarks, acted_at
+        
         Schema::create('payment_approvals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('payment_id');
-            $table->foreignId('workflow_step_id');
-            $table->foreignId('user_id');
-            $table->foreignId('role_id');
-            $table->string('action', 20);
-            $table->text('remarks')->nullable();    
-            $table->timestamp('acted_at')->nullable();
+            $table->foreignId('payment_id')->constrained('payments')->onDelete('cascade');
+            $table->foreignId('workflow_step_id')->nullable()->constrained('workflow_steps');
+            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('role_id')->constrained('roles');
+            $table->enum('action', ['approved', 'rejected']);
+            $table->text('remarks')->nullable();
+            $table->timestamp('acted_at')->useCurrent();
             $table->timestamps();
         });
     }

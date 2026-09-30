@@ -21,7 +21,7 @@ class PaymentApproval extends Model
 
     public function payment()
     {
-        return $this->belongsTo(Payment::class);
+        return $this->belongsTo(Payment::class, 'payment_id');
     }
 
     public function workflowStep()
@@ -36,6 +36,6 @@ class PaymentApproval extends Model
 
     public function role()
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsTo(Role::class, 'role_id');
     }
 }

@@ -11,18 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //id, payment_no, vendor_id, amount, payment_date, description, workflow_id, status, current_step_no, created_by, created_at
+        
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->string('payment_no');
-            $table->foreignId('vendor_id');
-            $table->integer('amount');
+            $table->string('payment_no')->unique();
+            $table->foreignId('vendor_id')->constrained('vendors');
+            $table->decimal('amount', 15, 2);
             $table->date('payment_date');
             $table->text('description')->nullable();
-            $table->foreignId('workflow_id');
-            $table->string('status', 20)->default('pending');
-            $table->integer('current_step_no')->default(0);
-            $table->foreignId('created_by');
+            $table->foreignId('workflow_id')->constrained('workflows');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->integer('current_step_no')->default(1);
+            $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
         });
     }
