@@ -16,6 +16,6 @@ Route::middleware('auth')->group(function () {
 
     
     Route::get('/approvals', [PaymentApprovalController::class, 'index'])->name('approvals.index');
-    Route::post('/approvals/{id}/approve', [PaymentApprovalController::class, 'approve'])->name('payments.approve');
-    Route::post('/approvals/{id}/reject', [PaymentApprovalController::class, 'reject'])->name('payments.reject');
+    Route::match(['get', 'post'],'/approvals/{id}/approve', [PaymentApprovalController::class, 'approve'])->name('payments.approve');
+    Route::match(['get', 'post'], '/approvals/{id}/reject', [PaymentApprovalController::class, 'reject'])->name('payments.reject');
 });

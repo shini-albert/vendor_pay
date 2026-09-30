@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('workflow_steps', function (Blueprint $table) {
             $table->id();
             $table->foreignId('workflow_id')->constrained('workflows')->onDelete('cascade');
-            $table->foreignId('rule_id')->nullable()->constrained('workflow_rules')->onDelete('cascade'); // Added rule_id
+            $table->foreignId('rule_id')->nullable()->constrained('workflow_rules')->onDelete('cascade'); 
             $table->integer('step_no');
             $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
             $table->string('step_name');

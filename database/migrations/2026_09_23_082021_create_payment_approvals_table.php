@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('workflow_step_id')->nullable()->constrained('workflow_steps');
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('role_id')->constrained('roles');
-            $table->enum('action', ['Approved', 'Rejected']);
+            $table->enum('action', ['approved', 'rejected']);
             $table->text('remarks')->nullable();
             $table->timestamp('acted_at')->useCurrent();
             $table->timestamps();

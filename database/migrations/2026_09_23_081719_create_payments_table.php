@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('payment_date');
             $table->text('description')->nullable();
             $table->foreignId('workflow_id')->constrained('workflows');
-            $table->enum('status', ['Pending', 'Approved', 'Rejected'])->default('Pending');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->integer('current_step_no')->default(1);
             $table->foreignId('created_by')->constrained('users');
             $table->timestamps();

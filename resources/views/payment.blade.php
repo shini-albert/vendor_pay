@@ -97,7 +97,7 @@
      
         <div class="form-group">
             <label>Amount</label>
-            <input type="number" name="amount" min="1" required>
+            <input type="number" name="amount" step="0.01" value="{{ old('amount') }}" required>    
         </div>
 
    

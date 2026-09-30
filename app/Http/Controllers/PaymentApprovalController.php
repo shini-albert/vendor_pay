@@ -40,19 +40,35 @@ class PaymentApprovalController extends Controller
         return view('approvals', compact('payments'));
     }
 
-    
+    protected function authorizeCurrentStep(Payment $payment, $user)
+    {
+        if (!$user || !$user->role_id) {
+            return null;
+        }
+
+       return Workflow_Step::where('workflow_id', $payment->workflow_id)
+            ->where('step_no', $payment->current_step_no)
+            ->where('role_id', $user->role_id)
+            ->first();
+    }
     public function approve(Request $request, $id)
     {
         $payment = Payment::findOrFail($id);
+        if ($payment->status !== 'pending') {
+        return back()->with('error', 'This payment is already in a terminal state and cannot be modified.');
+    }
         $user = Auth::user();
 
-  
-        $step = Workflow_Step::where('workflow_id', $payment->workflow_id)
-            ->where('step_no', $payment->current_step_no)
-            ->first();
-
-        if (!$step || $step->role_id !== $user->role_id) {
+        $step = $this->authorizeCurrentStep($payment, $user);
+        if (!$step) {
             return back()->with('error', 'Unauthorized action for your role at this step.');
+        }
+        $existingApproval = PaymentApproval::where('payment_id', $payment->id)
+            ->where('workflow_step_id', $step->id)
+            ->exists();
+
+        if ($existingApproval) {
+            return back()->with('error', 'This step has already been processed.');
         }
 
 
@@ -96,13 +112,14 @@ class PaymentApprovalController extends Controller
 
         $payment = Payment::findOrFail($id);
 
+        if ($payment->status !== 'pending') {
+            return back()->with('error', 'This payment is already in a terminal state and cannot be modified.');
+        }
+
         $user = Auth::user();
+        $step = $this->authorizeCurrentStep($payment, $user);
 
-        $step = Workflow_Step::where('workflow_id', $payment->workflow_id)
-            ->where('step_no', $payment->current_step_no)
-            ->first();
-
-        if (!$step || $step->role_id !== $user->role_id) {
+        if (!$step) {
             return back()->with('error', 'Unauthorized action for your role at this step.');
         }
 
