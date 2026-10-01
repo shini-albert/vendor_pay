@@ -1,10 +1,12 @@
 <?php
+
 namespace Tests\Feature;
 
 use App\Models\User;
 use App\Models\Vendor;
 use App\Models\Workflow;
 use App\Models\Payment;
+use App\Models\workflow_rule;
 use Database\Seeders\RoleSeeder;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\VendorSeeder;
@@ -46,15 +48,13 @@ class PaymentWorkflowTest extends TestCase
     }
 
     #[Test]
-    public function supervisor_approval_workflow(): void
+    public function supervisor_approval_workflow_with_dynamic_workflow_selection(): void
     {
         $requester = User::where('role_id', 4)->first();
         $supervisor = User::where('role_id', 3)->first();
-
         $response = $this->actingAs($requester)->post(route('payment.store'), [
             'payment_no' => 'PAY-30000',
             'vendor_id' => 1,
-            'workflow_id' => 1,
             'amount' => 30000,
             'payment_date' => now()->toDateString(),
             'description' => 'Low value request',
@@ -62,8 +62,9 @@ class PaymentWorkflowTest extends TestCase
 
         $response->assertStatus(302);
         $payment = Payment::latest()->first();
+        
+        $this->assertEquals(1, $payment->workflow_id);
         $this->assertEquals(1, $payment->current_step_no);
-
         $this->actingAs($supervisor)->post(route('payments.approve', $payment->id), [
             'remarks' => 'Approved by supervisor',
         ]);
@@ -87,13 +88,14 @@ class PaymentWorkflowTest extends TestCase
         $this->actingAs($requester)->post(route('payment.store'), [
             'payment_no' => 'PAY-75000',
             'vendor_id' => 1,
-            'workflow_id' => 2,
             'amount' => 75000,
             'payment_date' => now()->toDateString(),
             'description' => 'Medium value equipment',
         ]);
 
         $payment = Payment::latest()->first();
+        $this->assertEquals(2, $payment->workflow_id); 
+
         $this->actingAs($supervisor)->post(route('payments.approve', $payment->id), [
             'remarks' => 'First step approved',
         ]);
@@ -101,6 +103,7 @@ class PaymentWorkflowTest extends TestCase
         $payment->refresh();
         $this->assertEquals(2, $payment->current_step_no);
         $this->assertEquals('pending', $payment->status);
+        
         $this->actingAs($manager)->post(route('payments.approve', $payment->id), [
             'remarks' => 'Final step approved by manager',
         ]);
@@ -117,16 +120,18 @@ class PaymentWorkflowTest extends TestCase
         $supervisor = User::where('role_id', 3)->first();
         $manager = User::where('role_id', 2)->first();
         $admin = User::where('role_id', 1)->first();
+
         $this->actingAs($requester)->post(route('payment.store'), [
             'payment_no' => 'PAY-250000',
             'vendor_id' => 1,
-            'workflow_id' => 3,
             'amount' => 250000,
             'payment_date' => now()->toDateString(),
             'description' => 'High value asset purchase',
         ]);
 
         $payment = Payment::latest()->first();
+        $this->assertEquals(3, $payment->workflow_id); 
+
         $this->actingAs($supervisor)->post(route('payments.approve', $payment->id), ['remarks' => 'OK']);
         $payment->refresh();
         $this->assertEquals(2, $payment->current_step_no);
@@ -187,5 +192,122 @@ class PaymentWorkflowTest extends TestCase
             'action' => 'rejected',
             'remarks' => 'Budget allocation exceeded for this category.',
         ]);
+    }
+
+    #[Test]
+    public function threshold_boundary_values(): void
+    {
+        $requester = User::where('role_id', 4)->first();
+        $this->actingAs($requester)->post(route('payment.store'), [
+            'payment_no' => 'PAY-BOUND-1',
+            'vendor_id' => 1,
+            'amount' => 50000,
+            'payment_date' => now()->toDateString(),
+            'description' => 'Boundary check',
+        ]);
+
+        $payment = Payment::latest()->first();
+        $this->assertNotNull($payment->workflow_id);
+    }
+
+    #[Test]
+    public function workflow_threshold_change(): void
+    {
+        $requester = User::where('role_id', 4)->first();
+        workflow_rule::where('workflow_id', 1)->update(['value' => 10000]);
+
+        $this->actingAs($requester)->post(route('payment.store'), [
+            'payment_no' => 'PAY-DYN-1',
+            'vendor_id' => 1,
+            'amount' => 15000,
+            'payment_date' => now()->toDateString(),
+            'description' => 'Dynamic threshold test',
+        ]);
+
+        $payment = Payment::latest()->first();
+        $this->assertNotEquals(1, $payment->workflow_id);
+    }
+
+    #[Test]
+    public function duplicate_approval_or_rejection_prevention(): void
+    {
+        $supervisor = User::where('role_id', 3)->first();
+        $payment = Payment::factory()->create(['workflow_id' => 2, 'current_step_no' => 1]);
+        $this->actingAs($supervisor)->post(route('payments.approve', $payment->id), [
+            'remarks' => 'First approval',
+        ]);
+        $response = $this->actingAs($supervisor)->post(route('payments.approve', $payment->id), [
+            'remarks' => 'Duplicate approval attempt',
+        ]);
+
+        $response->assertStatus(302);
+    }
+
+    #[Test]
+    public function attempting_to_process_already_approved_or_rejected_payment(): void
+    {
+        $supervisor = User::where('role_id', 3)->first();
+        $payment = Payment::factory()->create(['status' => 'approved', 'workflow_id' => 1]);
+        $response = $this->actingAs($supervisor)->post(route('payments.approve', $payment->id), [
+            'remarks' => 'Trying to re-approve',
+        ]);
+
+        $response->assertStatus(302);
+    }
+
+    #[Test]
+    public function approval_visibility(): void
+    {
+        $supervisor = User::where('role_id', 3)->first();
+        
+        $response = $this->actingAs($supervisor)->get(route('approvals.index'));
+        $response->assertStatus(200);
+    }
+
+    #[Test]
+    public function requester_only_payment_creation(): void
+    {
+        $supervisor = User::where('role_id', 3)->first(); 
+
+        $response = $this->actingAs($supervisor)->post(route('payment.store'), [
+            'payment_no' => 'PAY-UNAUTH',
+            'vendor_id' => 1,
+            'amount' => 10000,
+            'payment_date' => now()->toDateString(),
+            'description' => 'Unauthorized creation attempt',
+        ]);
+        $response->assertStatus(403); 
+    }
+
+    #[Test]
+    public function inactive_vendor_rejection(): void
+    {
+        $requester = User::where('role_id', 4)->first();
+        $inactiveVendor = Vendor::factory()->create(['is_active' => '0']);
+
+        $response = $this->actingAs($requester)->post(route('payment.store'), [
+            'payment_no' => 'PAY-INACTIVE',
+            'vendor_id' => $inactiveVendor->id,
+            'amount' => 10000,
+            'payment_date' => now()->toDateString(),
+            'description' => 'Inactive vendor test',
+        ]);
+
+        $response->assertSessionHasErrors('vendor_id');
+    }
+
+    #[Test]
+    public function rejection_through_actual_ui_route(): void
+    {
+        $supervisor = User::where('role_id', 3)->first();
+        $payment = Payment::factory()->create(['workflow_id' => 2]);
+
+        $response = $this->actingAs($supervisor)->post(route('payments.reject', $payment->id), [
+            'remarks' => 'Rejected via UI route test',
+        ]);
+
+        $response->assertStatus(302);
+        $payment->refresh();
+        $this->assertEquals('rejected', $payment->status);
     }
 }
