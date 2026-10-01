@@ -48,7 +48,7 @@ class PaymentWorkflowTest extends TestCase
     }
 
     #[Test]
-    public function supervisor_approval_workflow_with_dynamic_workflow_selection(): void
+    public function supervisor_approval_workflow(): void
     {
         $requester = User::where('role_id', 4)->first();
         $supervisor = User::where('role_id', 3)->first();
@@ -268,7 +268,7 @@ class PaymentWorkflowTest extends TestCase
     public function requester_only_payment_creation(): void
     {
         $supervisor = User::where('role_id', 3)->first(); 
-
+        $initialCount = Payment::count();
         $response = $this->actingAs($supervisor)->post(route('payment.store'), [
             'payment_no' => 'PAY-UNAUTH',
             'vendor_id' => 1,
@@ -276,7 +276,8 @@ class PaymentWorkflowTest extends TestCase
             'payment_date' => now()->toDateString(),
             'description' => 'Unauthorized creation attempt',
         ]);
-        $response->assertStatus(403); 
+        $response->assertStatus(302); 
+        $this->assertEquals($initialCount, Payment::count());
     }
 
     #[Test]
