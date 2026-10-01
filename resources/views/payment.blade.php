@@ -60,6 +60,12 @@
             </form>
         </div>
     </div>
+    @if(session('error'))
+        <div class="alert alert-danger" style="background: #f8d7da; color: #721c24; padding: 12px 16px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #f5c6cb;">
+            {{ session('error') }}
+        </div>
+    @endif
+
 
     @if(session('success'))
         <div class="alert-success">{{ session('success') }}</div>

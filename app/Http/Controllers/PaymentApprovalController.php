@@ -20,8 +20,9 @@ class PaymentApprovalController extends Controller
         }
 
         $roleCode = strtolower($user->role->code ?? $user->role->name ?? '');
-        if ($roleCode === 'requester') {
-            return view('approvals', ['payments' => collect([])]);
+        if ($roleCode === 'requester' || $user->role_id == 4) {
+            return redirect()->route('payment')
+                ->with('error', 'Unauthorized action. Requesters are not allowed to view the approvals page.');
         }
 
         $roleId = $user->role_id;
@@ -70,6 +71,7 @@ class PaymentApprovalController extends Controller
         if ($existingApproval) {
             return back()->with('error', 'This step has already been processed.');
         }
+
 
         PaymentApproval::create([
             'payment_id'       => $payment->id,
