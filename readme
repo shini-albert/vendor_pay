@@ -2,7 +2,7 @@
 
 >>Prerequisites
 
-PHP = 8.2
+PHP >= 8.2
 Composer
 Node.js & npm
 MySQL database  
@@ -12,13 +12,16 @@ Git
 >>Installation Steps
 
 1. Clone or setup the project repository.
-2. Install PHP dependencies
+
+2. Install PHP and JavaScript dependencies:
 	composer install
 	npm install
-3. Set up a new Laravel project using Composer (no extra external packages are used): 
-	composer create-project laravel/laravel vendor_pay
-	cd vendor_pay
-4. Set configuration: cp .env.example .env
+
+3. Copy the environment configuration file: 
+	cp .env.example .env
+
+4. Generate and set the application key:
+	php artisan key:generate
 
 
 
@@ -35,7 +38,7 @@ DB_PASSWORD=
 
 2. Create an empty database named payment_workflow in MySQL 
 
-3. Generate Application Key: php artisan key:generate
+
 
 >>Migration and Seeding Procedure
 
@@ -62,9 +65,9 @@ Password : 123456 >>for all user
 
 
 
->>How to Run Automated Tests
+>>How to Run Test Suite
 
-php artisan test
+	php artisan test
 
 
 
