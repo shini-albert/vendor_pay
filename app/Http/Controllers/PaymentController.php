@@ -12,6 +12,11 @@ class PaymentController extends Controller
 {
     public function create()
     {
+        // Restrict access: Only users with the 'Requester' role can view the payment creation page
+        if (Auth::user()->role_id !== 4) { // Or Auth::user()->role_id !== 4 based on your roles table
+            abort(403, 'Unauthorized action. Only Requesters can create payments.');
+        }
+
         $vendors = Vendor::where('is_active', '1')->get();
         $lastPayment = Payment::latest('id')->first();
         $nextId = $lastPayment ? $lastPayment->id + 1 : 1;
@@ -21,6 +26,11 @@ class PaymentController extends Controller
 
     public function store(Request $request)
     {
+        // Restrict access: Only users with the 'Requester' role can submit payment requests
+        if (Auth::user()->role_id !== 4) { // Or Auth::user()->role_id !== 4
+            abort(403, 'Unauthorized action. Only Requesters can create payments.');
+        }
+
         $request->validate([
             'payment_no'   => 'required|string|unique:payments,payment_no',
             'vendor_id'    => ['required','integer', Rule::exists('vendors', 'id')->where('is_active', '1'),],
@@ -30,8 +40,8 @@ class PaymentController extends Controller
         ], [
             'vendor_id.exists' => 'The selected vendor is currently inactive.',
             'amount.min'       => 'The payment amount must be a positive number greater than zero.',
-            'description.required' => 'Description for the payment is mandatory.',]);
-
+            'description.required' => 'Description for the payment is mandatory.',
+        ]);
 
         $workflowId = $this->checkWorkflowId($request->amount);
 
@@ -50,7 +60,7 @@ class PaymentController extends Controller
         return redirect()->route('payment')->with('success', 'Payment submitted successfully!');
     }
 
-   private function checkWorkflowId($amount)
+    private function checkWorkflowId($amount)
     {
         $rules = workflow_rule::orderBy('value', 'asc')->get();
 

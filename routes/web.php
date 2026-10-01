@@ -11,11 +11,12 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
+    // Payment routes
     Route::get('/payment', [PaymentController::class, 'create'])->name('payment');
     Route::post('/payments', [PaymentController::class, 'store'])->name('payment.store');
 
-    
+    // Approval routes (POST only for actions)
     Route::get('/approvals', [PaymentApprovalController::class, 'index'])->name('approvals.index');
-    Route::match(['get', 'post'],'/approvals/{id}/approve', [PaymentApprovalController::class, 'approve'])->name('payments.approve');
-    Route::match(['get', 'post'], '/approvals/{id}/reject', [PaymentApprovalController::class, 'reject'])->name('payments.reject');
+    Route::post('/approvals/{id}/approve', [PaymentApprovalController::class, 'approve'])->name('payments.approve');
+    Route::post('/approvals/{id}/reject', [PaymentApprovalController::class, 'reject'])->name('payments.reject');
 });
