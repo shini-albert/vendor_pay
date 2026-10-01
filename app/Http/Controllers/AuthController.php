@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-
     public function showLoginForm()
     {
         return view('login');
@@ -16,13 +15,20 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'username'    => 'required|string',
+            'username' => 'required|string',
             'password' => 'required',
         ]);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended(route('payment'));
+
+            $user = Auth::user();
+
+            if ($user->role_id == 4) {
+                return redirect()->route('payment');
+            }
+
+            return redirect()->route('approvals.index');
         }
 
         return back()->withErrors([
@@ -30,14 +36,12 @@ class AuthController extends Controller
         ]);
     }
 
-  
     public function logout()
     {
         Auth::logout();
         return redirect('/login');
     }
 
- 
     public function showTestPage()
     {
         $user = Auth::user();

@@ -29,8 +29,8 @@
 
         .history-box { background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px dashed #ccc; font-size: 12px; margin-top: 5px; display: none; }
         .empty-box { text-align: center; padding: 40px; background: #fff; border-radius: 8px; color: #777; }
-        .alert-success { background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
-        .alert-danger { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
+        .alert-success { background: #d4edda; color: #155724; padding: 12px 16px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #c3e6cb; font-weight: 500; }
+        .alert-danger { background: #f8d7da; color: #721c24; padding: 12px 16px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #f5c6cb; font-weight: 500; }
         .alert-danger ul { margin: 0; padding-left: 20px; }
     </style>
 </head>
@@ -40,9 +40,9 @@
     <div class="header-bar">
         <h2>Payment Approvals List ({{ auth()->user()->role->name ?? 'User' }})</h2>
         <div>
-            @if(auth()->user()->role->code === 'requester')
-                <a href="{{ route('payment') }}" style="color: #007bff; text-decoration: none; font-weight: bold; margin-left: 10px;">+ New Payment</a>
-            @endif
+            {{-- Always show the button regardless of user role --}}
+            <a href="{{ route('payment') }}" style="color: #007bff; text-decoration: none; font-weight: bold; margin-left: 10px;">+ New Payment</a>
+
             <form method="POST" action="{{ route('logout') }}" style="display: inline; margin-left: 15px;">
                 @csrf
                 <button type="submit" style="background: none; border: none; color: #dc3545; font-weight: bold; cursor: pointer; padding: 0; font-size: inherit;">
@@ -52,6 +52,7 @@
         </div>
     </div>
 
+    {{-- Global Alert Banner Messages --}}
     @if(session('success'))
         <div class="alert-success">{{ session('success') }}</div>
     @endif
@@ -72,94 +73,93 @@
 
     @if(count($payments) > 0)
         <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Sl no.</th>
-                    <th>Payment No.</th>
-                    <th>Date</th>
-                    <th>Vendor</th>
-                    <th>Amount</th>
-                    <th>Description</th>
-                    <th>Workflow & Step</th>
-                    <th>Status</th>
-                    <th>Approval History</th>
-                    <th style="min-width: 220px;">Remarks & Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($payments as $payment)
-                <tr>
-                    <td><strong>{{ $loop->iteration }}</strong></td>
-                    <td><span>{{ $payment->payment_no }}</span></td>
-                    <td>{{ \Carbon\Carbon::parse($payment->payment_date)->format('d M Y') }}</td>
-                    <td>
-                        <strong>{{ $payment->vendor->name ?? 'Vendor ID: ' . $payment->vendor_id }}</strong>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sl no.</th>
+                        <th>Payment No.</th>
+                        <th>Date</th>
+                        <th>Vendor</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                        <th>Workflow & Step</th>
+                        <th>Status</th>
+                        <th>Approval History</th>
+                        <th style="min-width: 220px;">Remarks & Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($payments as $payment)
+                    <tr>
+                        <td><strong>{{ $loop->iteration }}</strong></td>
+                        <td><span>{{ $payment->payment_no }}</span></td>
+                        <td>{{ \Carbon\Carbon::parse($payment->payment_date)->format('d M Y') }}</td>
+                        <td>
+                            <strong>{{ $payment->vendor->name ?? 'Vendor ID: ' . $payment->vendor_id }}</strong>
+                        </td>
+                        <td>
+                            <strong>₹{{ number_format($payment->amount, 2) }}</strong>
+                        </td>
+                        <td style="max-width: 180px;">
+                            {{ $payment->description ?? 'N/A' }}
+                        </td>
+                        <td>
+                            {{ $payment->workflow->name ?? 'Workflow #' . $payment->workflow_id }}<br>
+                            <span class="badge-step">Step {{ $payment->current_step_no }}</span>
+                        </td>
+                        <td>
+                            <span class="badge-status">{{ strtoupper($payment->status ?? 'pending') }}</span>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-toggle" onclick="toggleHistory({{ $payment->id }})">View History</button>
+                            <div id="history-{{ $payment->id }}" class="history-box" style="display: none;">
+                                <strong>Audit Logs:</strong>
+                                @forelse($payment->approvals ?? [] as $history)
+                                    <p style="margin: 3px 0; font-size: 11px;">
+                                        <span class="badge bg-secondary" style="font-size: 9px;">
+                                            Step {{ $history->step_no ?? $history->workflowStep->step_no ?? 'N/A' }}
+                                        </span>
+                                        <strong>{{ $history->user->name ?? 'User' }} ({{ $history->role->name ?? 'Role' }}):</strong>
+                                        
+                                        <span style="color: {{ $history->action === 'approved' ? '#198754' : '#dc3545' }}; font-weight: bold;">
+                                            {{ ucfirst($history->action) }}
+                                        </span>
+                                        @if($history->remarks) ("{{ $history->remarks }}") @endif
+                                        
+                                        <span style="color: #6c757d; font-size: 10px;">
+                                            ({{ \Carbon\Carbon::parse($history->acted_at)->format('Y-m-d H:i:s') }} - {{ \Carbon\Carbon::parse($history->acted_at)->diffForHumans() }})
+                                        </span>
+                                    </p>
+                                @empty
+                                    <p style="margin: 3px 0; color: #6c757d; font-style: italic;">No previous approvals logged yet.</p>
+                                @endforelse
+                            </div>
+                        </td>
+            
+                        <td>
+                        @if(isset($payment->can_approve) ? $payment->can_approve : true)
+                            <textarea id="remarks-{{ $payment->id }}" name="remarks" rows="2" placeholder="Enter remarks..." style="margin-bottom: 6px;"></textarea>
+                            <div class="btn-group">
+                                <form action="{{ route('payments.approve', $payment->id) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    <input type="hidden" name="remarks" id="hidden-approve-remarks-{{ $payment->id }}">
+                                    <button type="submit" class="btn btn-approve" onclick="document.getElementById('hidden-approve-remarks-{{ $payment->id }}').value = document.getElementById('remarks-{{ $payment->id }}').value;">Approve</button>
+                                </form>
+                                <form action="{{ route('payments.reject', $payment->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to reject this payment?');">
+                                    @csrf
+                                    <input type="hidden" name="remarks" id="hidden-reject-remarks-{{ $payment->id }}">
+                                    <button type="submit" class="btn btn-reject" onclick="document.getElementById('hidden-reject-remarks-{{ $payment->id }}').value = document.getElementById('remarks-{{ $payment->id }}').value;">Reject</button>
+                                </form>
+                            </div>
+                        @else
+                            <span style="color: #6c757d; font-style: italic; font-size: 12px;">No pending action</span>
+                        @endif
                     </td>
-                    <td>
-                        <strong>₹{{ number_format($payment->amount, 2) }}</strong>
-                    </td>
-                    <td style="max-width: 180px;">
-                        {{ $payment->description ?? 'N/A' }}
-                    </td>
-                    <td>
-                        {{ $payment->workflow->name ?? 'Workflow #' . $payment->workflow_id }}<br>
-                        <span class="badge-step">Step {{ $payment->current_step_no }}</span>
-                    </td>
-                    <td>
-                        <span class="badge-status">{{ strtoupper($payment->status ?? 'pending') }}</span>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-toggle" onclick="toggleHistory({{ $payment->id }})">View History</button>
-                        <div id="history-{{ $payment->id }}" class="history-box" style="display: none;">
-                            <strong>Audit Logs:</strong>
-                            @forelse($payment->approvals ?? [] as $history)
-                                <p style="margin: 3px 0; font-size: 11px;">
-                                    <span class="badge bg-secondary" style="font-size: 9px;">
-                                        Step {{ $history->step_no ?? $history->workflowStep->step_no ?? 'N/A' }}
-                                    </span>
-                                    <strong>{{ $history->user->name ?? 'User' }} ({{ $history->role->name ?? 'Role' }}):</strong>
-                                    
-                                    <span style="color: {{ $history->action === 'approved' ? '#198754' : '#dc3545' }}; font-weight: bold;">
-                                        {{ ucfirst($history->action) }}
-                                    </span>
-                                    @if($history->remarks) ("{{ $history->remarks }}") @endif
-                                    
-                                    <span style="color: #6c757d; font-size: 10px;">
-                                        ({{ \Carbon\Carbon::parse($history->acted_at)->format('Y-m-d H:i:s') }} - {{ \Carbon\Carbon::parse($history->acted_at)->diffForHumans() }})
-                                    </span>
-                                </p>
-                            @empty
-                                <p style="margin: 3px 0; color: #6c757d; font-style: italic;">No previous approvals logged yet.</p>
-                            @endforelse
-                        </div>
-                    </td>
-        
-                    <td>
-                    @if(isset($payment->can_approve) ? $payment->can_approve : true)
-                        <textarea id="remarks-{{ $payment->id }}" name="remarks" rows="2" placeholder="Enter remarks..." style="margin-bottom: 6px;"></textarea>
-                        <div class="btn-group">
-                        
-                            <form action="{{ route('payments.approve', $payment->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                <input type="hidden" name="remarks" id="hidden-approve-remarks-{{ $payment->id }}">
-                                <button type="submit" class="btn btn-approve" onclick="document.getElementById('hidden-approve-remarks-{{ $payment->id }}').value = document.getElementById('remarks-{{ $payment->id }}').value;">Approve</button>
-                            </form>
-                            <form action="{{ route('payments.reject', $payment->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to reject this payment?');">
-                                @csrf
-                                <input type="hidden" name="remarks" id="hidden-reject-remarks-{{ $payment->id }}">
-                                <button type="submit" class="btn btn-reject" onclick="document.getElementById('hidden-reject-remarks-{{ $payment->id }}').value = document.getElementById('remarks-{{ $payment->id }}').value;">Reject</button>
-                            </form>
-                        </div>
-                    @else
-                        <span style="color: #6c757d; font-style: italic; font-size: 12px;">No pending action</span>
-                    @endif
-                </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     @else
         <div class="empty-box">
             <h3>No Payments Found</h3>
